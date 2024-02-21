@@ -1,37 +1,73 @@
-// database.ts
-import {
-  doc,
-  getDoc,
-  setDoc,
-  FirestoreDataConverter,
-} from "firebase/firestore";
-import { User, userConverter, Note, noteConverter } from "./types";
-import { db } from "../firebaseConfig";
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { usersCollection, notesCollection } from "./collections";
+import { User, Note } from "./types";
 
-const usersCollection = "users";
-const notesCollection = "notes";
+// ユーザーを作成または更新
+export const upsertUser = async (user: User): Promise<void> => {
+  const userRef = doc(usersCollection, user.id);
+  await setDoc(userRef, user, { merge: true });
+};
 
+// ユーザーを取得
 export async function getUser(userId: string): Promise<User | undefined> {
-  const docRef = doc(db, usersCollection, userId).withConverter(userConverter);
-  const docSnap = await getDoc(docRef);
-
+  const userRef = doc(usersCollection, userId);
+  const docSnap = await getDoc(userRef);
   if (docSnap.exists()) {
-    return docSnap.data();
+    return docSnap.data() as User;
   } else {
-    console.log("No such document!");
+    console.log("No such user!");
     return undefined;
   }
 }
 
-export async function createUser(user: User): Promise<void> {
-  console.log("db.app.name = ", db.app.name);
-  const docRef = doc(db, usersCollection, user.id).withConverter(userConverter);
-  await setDoc(docRef, user);
+// ノートを作成または更新
+export const upsertNote = async (note: Note): Promise<void> => {
+  const noteRef = doc(notesCollection, note.id);
+  await setDoc(noteRef, note, { merge: true });
+};
+// ノートを取得
+export const getNote = async (noteId: string): Promise<Note | undefined> => {
+  const noteRef = doc(notesCollection, noteId);
+  const docSnap = await getDoc(noteRef);
+  if (docSnap.exists()) {
+    return docSnap.data() as Note;
+  } else {
+    return undefined;
+  }
+};
+
+// ノートを共有する
+export const shareNote = async (
+  noteId: string,
+  userId: string
+): Promise<void> => {
+  const noteRef = doc(notesCollection, noteId);
+  await updateDoc(noteRef, {
+    sharedWith: arrayUnion(userId),
+  });
+};
+
+// ノートの共有を解除する
+export const unshareNote = async (
+  noteId: string,
+  userId: string
+): Promise<void> => {
+  const noteRef = doc(notesCollection, noteId);
+  await updateDoc(noteRef, {
+    sharedWith: arrayRemove(userId),
+  });
+};
+// ノートを更新
+export async function updateNote(
+  noteId: string,
+  updates: Partial<Note>
+): Promise<void> {
+  const noteRef = doc(notesCollection, noteId);
+  await updateDoc(noteRef, updates);
 }
 
-export async function createNote(note: Note): Promise<void> {
-  const docRef = doc(db, notesCollection, note.id).withConverter(noteConverter);
-  await setDoc(docRef, note);
+// ノートを削除
+export async function deleteNote(noteId: string): Promise<void> {
+  const noteRef = doc(notesCollection, noteId);
+  await deleteDoc(noteRef);
 }
-
-// 他の必要な操作（ノートの取得、更新、共有など）も同様に実装

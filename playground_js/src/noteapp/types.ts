@@ -1,4 +1,3 @@
-// models.ts
 import { FirestoreDataConverter, Timestamp } from "firebase/firestore";
 
 export type User = {

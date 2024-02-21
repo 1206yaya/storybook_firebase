@@ -1,5 +1,4 @@
 import {
-  initializeTestEnvironment,
   assertSucceeds,
   assertFails,
   RulesTestEnvironment,
