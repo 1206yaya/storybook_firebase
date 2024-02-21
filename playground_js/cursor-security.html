@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Prompt</title>
+    <style>
+      .container {
+        display: flex;
+      }
+      .column {
+        flex: 1;
+        padding: 10px;
+      }
+      pre {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="column">
+        <pre id="JP">
+          Firestore操作をFirebase Security Rules 通してアクセスする方法を理解するためのチュートリアルプロジェクトを作成せよ
+
+
+要件:
+- Typescript
+- JavaScript SDK v9 (addDoc, getDoc, …)
+- このプロジェクトは、起動済みのローカルエミュレーター上のFirestoreを利用する
+- jestを用いて実装を確認する
+- ターミナル上で必要となる操作(プロジェクトのセットアップなど)は、全てMakefileに記述する
+- 作成しないファイル: .gitignore, tsconfig.json, jest.config.js, .firebaserc, firebase.json
+
+アプリ情報:
+```
+const firebaseConfig = {
+  apiKey: "AIzaSyCRhywe00DE96G7L6kHdRSdieu66WwkEm4",
+  authDomain: "storybook-firebase-70993.firebaseapp.com",
+  projectId: "storybook-firebase-70993",
+  storageBucket: "storybook-firebase-70993.appspot.com",
+  messagingSenderId: "632650751252",
+  appId: "1:632650751252:web:72c0f1e77fc66e1af93601",
+  measurementId: "G-Y321FVW0XC",
+};
+```
+
+types.ts
+```
+export interface FirestoreDocument {
+  id: string; // Assuming each document will have an ID field
+  // Add other document fields here
+  // e.g., name: string;
+  //       createdAt: firebase.firestore.Timestamp;
+  //       updatedAt: firebase.firestore.Timestamp;
+}
+```
+
+
+
+
+
+        </pre>
+      </div>
+      <div class="column">
+        <pre id="EN">
+Create a tutorial project to understand how to access Firestore operations through Firebase Security Rules.
+
+
+Requirement: Create a tutorial project to understand how to access Firestore operations through Firebase Security Rules.
+- Typescript
+- JavaScript SDK v9 (addDoc, getDoc, ...)
+- This project will use Firestore on a local emulator already started.
+- Verify the implementation using jest.
+- All operations required on the terminal (project setup, etc.) must be written in the Makefile
+
+
+````
+const firebaseConfig = {
+
+authDomain: "storybook-firebase-70993.firebaseapp.com",.
+projectId: "storybook-firebase-70993",.
+storageBucket: "storybook-firebase-70993.appspot.com", projectId: "storybook-firebase-70993", storageBucket.
+messagingSenderId: "632650751252", appId.
+appId: "1:632650751252:web:72c0f1e77fc66e1af93601",
+measurementId: "G-Y321FVVW0XC",.
+};
+```
+
+types.ts
+```
+export interface FirestoreDocument {
+id: string; // Assuming each document will have an ID field
+// Add other document fields here
+// e.g., name: string;
+// createdAt: firebase.firestore.Timestamp;
+// updatedAt: firebase.firestore.Timestamp; }
+}
+```
+
+
+
+
+
+
+        </pre>
+      </div>
+    </div>
+    <script></script>
+  </body>
+</html>

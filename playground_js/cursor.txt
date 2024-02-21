@@ -1,0 +1,23 @@
+Firestoreの仕様を確認するための、CRUD操作を行うシンプルなプロジェクトを作成せよ
+
+要件:
+- Typescript
+- このプロジェクトは、起動済みのローカルエミュレーター上のFirestoreを利用する
+- jestを用いて実装を確認する
+- ターミナル上で必要となる操作(プロジェクトのセットアップなど)は、全てMakefileに記述する
+
+アプリ情報:
+```
+const firebaseConfig = {
+  apiKey: "AIzaSyCRhywe00DE96G7L6kHdRSdieu66WwkEm4",
+  authDomain: "storybook-firebase-70993.firebaseapp.com",
+  projectId: "storybook-firebase-70993",
+  storageBucket: "storybook-firebase-70993.appspot.com",
+  messagingSenderId: "632650751252",
+  appId: "1:632650751252:web:72c0f1e77fc66e1af93601",
+  measurementId: "G-Y321FVW0XC",
+};
+```
+
+---
+Firebase Security Rules
