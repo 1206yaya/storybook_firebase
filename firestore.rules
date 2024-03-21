@@ -1,17 +1,39 @@
-// service cloud.firestore {
-//   match /databases/{database}/documents {
-//     match /{document=**} {
-//       allow read, write: if true;
-//     }
-//   }
-// }
+// Root-level rules
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Basic content ownership rule
-    match /{document=**} {
-      allow read, write: if true;
+    // match /{document=**} {
+    //   allow read, write: if true;
+    // }
+    match /drafts/{draftID} {
+      // authorUID: string, required
+      // content: string, optional
+      // createdAt: timestamp, required
+      // title: string, < 50 characters, required
+      // url: string, optional
+      allow create: if
+      // User creating document is draft author
+      request.auth.uid == request.resource.data.authorUID &&
+      // Must include title, author, and url fields
+      request.resource.data.keys().hasAll([
+      "authorUID",
+      "createdAt",
+      "title"
+      ]) &&
+      // Title must be < 50 characters long
+      request.resource.data.title.size() < 50;
+      allow update: if
+        // User is the author, and
+        resource.data.authorUID == request.auth.uid &&
+        // `authorUID` and `createdAt` are unchanged
+        request.resource.data.diff(resource.data).unchangedKeys().hasAll([
+        "authorUID",
+        "createdAt",
+        ]) &&
+        // Title must be < 50 characters long
+        request.resource.data.title.size() < 50;
     }
-
   }
 }
+

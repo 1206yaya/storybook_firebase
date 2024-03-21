@@ -1,0 +1,118 @@
+// drafts.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // match /{document=**} {
+    //   allow read, write: if true;
+    // }
+    // Returns true if user is post author or a moderator
+    function isAuthorOrModerator(post, auth) {
+      let isAuthor = auth.uid == post.authorUID;
+      let isModerator = auth.token.isModerator == true;
+      return isAuthor || isModerator;
+    }
+    function isAnonymous(auth) {
+      return auth.uid == null 
+        || auth.token.firebase.sign_in_provider == "anonymous";
+    }
+
+    function titleIsUnder50Chars(post) {
+      return post.title.size() < 50;
+    }
+
+    match /drafts/{draftID} {
+      // authorUID: string, required
+      // content: string, optional
+      // createdAt: timestamp, required
+      // title: string, < 50 characters, required
+      // url: string, optional
+      allow create: if
+        // 作成者はユーザー自身
+        request.auth.uid == request.resource.data.authorUID &&
+        // 必須フールド
+        request.resource.data.keys().hasAll([
+          "authorUID",
+          "createdAt",
+          "title"
+        ]) &&
+        // Title must be < 50 characters long
+        request.resource.data.title.size() < 50;
+
+      allow update: if
+        request.auth.uid == resource.data.authorUID &&
+        // 不変フィールドの確認
+        request.resource.data.diff(resource.data).unchangedKeys().hasAll([
+          "authorUID",
+          "createdAt",
+        ]) &&
+        // Title must be < 50 characters long
+        request.resource.data.title.size() < 50;
+
+      allow read, delete: if
+        // 作者であること
+        resource.data.authorUID == request.auth.uid ||
+        // モデレーターであること
+        request.auth.token.isModerator == true;
+    }
+    // Published blog posts are denormalized from drafts
+    match /published/{postID} {
+      // `authorUID`: string, required
+      // `content`: string, required
+      // `publishedAt`: timestamp, required
+      // `title`: string, < 50 characters, required
+      // `url`: string, required
+      // `visible`: boolean, required
+
+      // Can be read by everyone
+      allow read: if true;
+
+      // Function関数によって実行される
+      allow create, delete: if false;
+
+      allow update: if
+        isAuthorOrModerator(resource.data, request.auth) &&
+        // Immutable fields are unchanged
+        request.resource.data.diff(resource.data).unchangedKeys().hasAll([
+          "authorUID",
+          "publishedAt",
+          "url"
+        ]) &&
+        // Required fields are present
+        request.resource.data.keys().hasAll([
+          "content",
+          "title",
+          "visible"
+        ]) &&
+        titleIsUnder50Chars(request.resource.data);
+    }
+    match /published/{postID}/comments/{commentID} {
+      // `authorUID`: string, required
+      // `createdAt`: timestamp, required
+      // `editedAt`: timestamp, optional
+      // `comment`: string, < 500 characters, required
+
+      // Must have permanent account to read comments
+      allow read: if isAnonymous(request.auth) == false;
+
+      allow create: if
+        // User has verified email
+        request.auth.token.email_verified == true &&
+        // Comment is under 500 charachters
+        request.resource.data.comment.size() < 500 &&
+        // UID is not on the block list
+        !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+
+      allow update: if
+        // is author
+        request.auth.uid == resource.data.authorUID &&
+        // within an hour of comment creation
+        (request.time - resource.data.createdAt) < duration.value(1, 'h');
+
+      allow delete: if
+        // is comment author or moderator
+        isAuthorOrModerator(resource.data, request.auth) ||
+        // is blog post author
+        request.auth.uid == get(/databases/$(database)/documents/published/$(postID)).data.authorUID;
+    }
+  }
+}
